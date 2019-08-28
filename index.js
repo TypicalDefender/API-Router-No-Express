@@ -26,7 +26,7 @@ const server = http.createServer((req, res)=>{
 
 
     var choosenHandler = typeof(router[trimmedpath]) !== 'undefined' ? router[trimmedpath] : handlers.notFound;
-    //construct the data object that to send to the handler
+    ////construct the data object that to send to the handler
     var data = {
       'trimmedpath' : trimmedpath,
       'queryStringObject': queryStringObject,
