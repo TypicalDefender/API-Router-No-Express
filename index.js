@@ -1,8 +1,37 @@
 //@sarthak_acoustic
-const http = require('http')
-const url = require('url')
-const StringDecoder = require('string_decoder').StringDecoder
-const server = http.createServer((req, res)=>{
+const http = require('http');
+const https = require('https');
+const url = require('url');
+const StringDecoder = require('string_decoder').StringDecoder;
+const config = require('./config');
+const fs = require('fs');
+
+const httpServer = http.createServer((req, res)=>{
+    unifiedServer(req, res);
+});
+
+  // //GET the headers as an Object
+  // //console.log('the requested path is : '+trimmedpath + ' with method : '+method+' with query string object ',queryStringObject);
+  // console.log('the requested headers are : ', headers);
+
+httpServer.listen(config.httpPort, ()=>{
+  console.log('the server is listening on port '+config.httpPort+' and in '+config.envName+' mode');
+});
+
+var httpsServerOptions = {
+  'key' : fs.readFileSync('./https/key.pem'),
+  'cert' : fs.readFileSync('./https/cert.pem')
+};
+//creating a httpsServer with httpsServerOptions(for encryption)
+const httpsServer = https.createServer(httpsServerOptions, (req, res)=>{
+  unifiedServer(req, res);
+});
+
+httpsServer.listen(config.httpsPort, ()=>{
+  console.log('the server is listening on port '+config.httpsPort);
+});
+
+const unifiedServer = (req, res)=>{
   //##parsing the requested url path
   const pathURL = url.parse(req.url, true);
   const path = pathURL.pathname;
@@ -26,7 +55,7 @@ const server = http.createServer((req, res)=>{
 
 
     var choosenHandler = typeof(router[trimmedpath]) !== 'undefined' ? router[trimmedpath] : handlers.notFound;
-    ////construct the data object that to send to the handler
+    //construct the data object that to send to the handler
     var data = {
       'trimmedpath' : trimmedpath,
       'queryStringObject': queryStringObject,
@@ -46,24 +75,18 @@ const server = http.createServer((req, res)=>{
     res.writeHead(statusCode);
     res.end(payloadString);
     console.log('returning the response : ', statusCode, payloadString);
+     })
   })
-
-  });
-  })
-  // //GET the headers as an Object
-
-  // //console.log('the requested path is : '+trimmedpath + ' with method : '+method+' with query string object ',queryStringObject);
-  // console.log('the requested headers are : ', headers);
-
-server.listen(3000, ()=>{
-  console.log('the server is listening at port http://localhost:3000');
-})
-
+};
 
 var handlers = {};
 //sample handler
-handlers.sample = (data, callback)=>{
-  callback(406, {"name" : "sample handler"});
+// handlers.sample = (data, callback)=>{
+//   callback(406, {"name" : "sample handler"});
+// };
+//ping handler [used to check whether our app is alive or not]
+handlers.ping = (data, callback)=>{
+  callback(200);
 };
 //notFound handler
 handlers.notFound = (data, callback)=>{
@@ -71,5 +94,5 @@ handlers.notFound = (data, callback)=>{
 };
 //define a request router
 var router = {
-  'sample' : handlers.sample
+  'ping' : handlers.ping
 };
