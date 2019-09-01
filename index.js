@@ -1,10 +1,21 @@
 //@sarthak_acoustic
+//openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
 const http = require('http');
 const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
 const fs = require('fs');
+const _data = require('./lib/data');
+
+//@TODO -> TESTING
+_data.update('test','newFile',{'name' : 'dev'}, (err)=>{
+  console.log('the error is', err);
+})
+
+// _data.read('test','newFile', (err, data)=>{
+//   console.log('the error is', err, ' and the data is',data);
+// })
 
 const httpServer = http.createServer((req, res)=>{
     unifiedServer(req, res);
@@ -18,18 +29,18 @@ httpServer.listen(config.httpPort, ()=>{
   console.log('the server is listening on port '+config.httpPort+' and in '+config.envName+' mode');
 });
 
-var httpsServerOptions = {
-  'key' : fs.readFileSync('./https/key.pem'),
-  'cert' : fs.readFileSync('./https/cert.pem')
-};
+// var httpsServerOptions = {
+//   'key' : fs.readFileSync('./https/key.pem'),
+//   'cert' : fs.readFileSync('./https/cert.pem')
+// };
 //creating a httpsServer with httpsServerOptions(for encryption)
-const httpsServer = https.createServer(httpsServerOptions, (req, res)=>{
-  unifiedServer(req, res);
-});
-
-httpsServer.listen(config.httpsPort, ()=>{
-  console.log('the server is listening on port '+config.httpsPort);
-});
+// const httpsServer = https.createServer(httpsServerOptions, (req, res)=>{
+//   unifiedServer(req, res);
+// });
+//
+// httpsServer.listen(config.httpsPort, ()=>{
+//   console.log('the server is listening on port '+config.httpsPort);
+// });
 
 const unifiedServer = (req, res)=>{
   //##parsing the requested url path
@@ -84,6 +95,7 @@ var handlers = {};
 // handlers.sample = (data, callback)=>{
 //   callback(406, {"name" : "sample handler"});
 // };
+
 //ping handler [used to check whether our app is alive or not]
 handlers.ping = (data, callback)=>{
   callback(200);
